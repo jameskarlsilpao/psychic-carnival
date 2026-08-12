@@ -73,10 +73,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'main.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/6.1/ref/settings/#databases
-
 if os.environ.get("ENVIRONMENT") == "PRODUCTION":
     DATABASES = {'default': dj_database_url.config(conn_max_age=600, ssl_require=True)}
 else:
@@ -90,7 +86,6 @@ else:
             'PORT': '5432',
         }
     }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/6.1/ref/settings/#auth-password-validators
