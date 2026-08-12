@@ -78,7 +78,7 @@ if os.environ.get("ENVIRONMENT") == "PRODUCTION":
 else:
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
+            'ENGINE': 'django.db.backends.postgresql',
             'NAME': 'postgres',
             'USER': 'postgres',
             'PASSWORD': os.getenv('DB_PASSWORD'),
