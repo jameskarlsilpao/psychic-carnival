@@ -79,8 +79,16 @@ WSGI_APPLICATION = 'main.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': os.environ.get('DB_PASSWORD'),
+        'HOST': os.environ.get('DB_HOST'),
+        'PORT': os.environ.get('5432'),
+        # Required for Vercel Serverless to close connections properly
+        'CONN_MAX_AGE': 0, 
+        'OPTIONS': {
+            'sslmode': 'require',
+        },
 }
 
 
