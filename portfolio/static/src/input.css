@@ -1,0 +1,128 @@
+@import "tailwindcss";
+
+
+/* CUSTOM CSS */
+@theme {
+    --test-animation: fadeEffect 5s ease-in-out;
+    @keyframes fadeEffect {
+        0% { opacity: 0; }
+        30% { opacity: 0.8; }
+        60% { opacity: 0.2; }
+        100% { opacity: 1; }
+    }
+
+    --shine-animation: shine 2s linear infinite;
+    @keyframes shine {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(400%); }
+    }
+
+    --animate-fade-up: fadeUp 0.7s ease-out both;
+    @keyframes fadeUp {
+        0% { opacity: 0; transform: translateY(40px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+
+    --animate-fade-in: fadeIn 0.8s ease-out both;
+    @keyframes fadeIn {
+        0% { opacity: 0; }
+        100% { opacity: 1; }
+    }
+
+    --animate-slide-left: slideLeft 0.8s ease-out both;
+    @keyframes slideLeft {
+        0% { opacity: 0; transform: translateX(-40px); }
+        100% { opacity: 1; transform: translateX(0); }
+    }
+
+    --animate-slide-right: slideRight 0.8s ease-out both;
+    @keyframes slideRight {
+        0% { opacity: 0; transform: translateX(40px); }
+        100% { opacity: 1; transform: translateX(0); }
+    }
+}
+
+/* Project card reveal on scroll using IntersectionObserver */
+.project-card {
+    opacity: 0;
+}
+.project-card.is-visible {
+    animation: fadeUp 0.7s ease-out forwards;
+}
+.project-card:nth-child(odd).is-visible {
+    animation: slideLeft 0.8s ease-out forwards;
+}
+.project-card:nth-child(even).is-visible {
+    animation: slideRight 0.8s ease-out forwards;
+}
+
+/* Subtle gradient shimmer on hover */
+.project-card:hover .card-image {
+    transform: scale(1.03);
+}
+.card-image {
+    transition: transform 0.5s ease;
+}
+
+.bitcount-prop-single-pixel {
+  font-family: "Bitcount Prop Single", system-ui;
+}
+
+/* Site theme: neutral surfaces keep the orange accent crisp and intentional. */
+:root {
+    color-scheme: light;
+    background: #f7f7f5;
+}
+
+body {
+    background: radial-gradient(circle at 8% 0%, #fff3e6 0, transparent 29rem), #f7f7f5;
+    color: #18181b;
+    transition: background-color .25s ease, color .25s ease;
+}
+
+.site-header a {
+    color: #27272a;
+    transition: color .2s ease, opacity .2s ease;
+}
+.site-header a:hover { color: #fff; }
+
+.theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    flex: 0 0 auto;
+    border: 1px solid rgb(67 20 7 / .45);
+    border-radius: .75rem;
+    color: #27272a;
+    background: rgb(255 255 255 / .2);
+    cursor: pointer;
+    transition: background-color .2s ease, color .2s ease, transform .2s ease;
+}
+.theme-toggle:hover { background: #27272a; color: #fff; transform: translateY(-1px); }
+.theme-toggle:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+.theme-icon { width: 1.1rem; height: 1.1rem; }
+.theme-icon-moon { display: none; }
+
+html.dark {
+    color-scheme: dark;
+    background: #111113;
+}
+html.dark body {
+    background: radial-gradient(circle at 8% 0%, #3c2416 0, transparent 31rem), #111113;
+    color: #f4f4f5;
+}
+html.dark .bg-white { background-color: #1c1c20 !important; }
+html.dark .bg-zinc-50 { background-color: #18181b !important; }
+html.dark .bg-zinc-100 { background-color: #27272a !important; }
+html.dark .bg-amber-50 { background-color: #2a2119 !important; }
+html.dark .border-zinc-100, html.dark .border-zinc-200, html.dark .border-zinc-300 { border-color: #3f3f46 !important; }
+html.dark .text-zinc-800, html.dark .text-zinc-700, html.dark .text-zinc-600 { color: #e4e4e7 !important; }
+html.dark .text-zinc-500 { color: #a1a1aa !important; }
+html.dark .text-zinc-900 { color: #18181b !important; }
+html.dark input { color: #f4f4f5 !important; background-color: #27272a !important; }
+html.dark .site-header a { color: #27272a; }
+html.dark .site-header a:hover { color: #fff; }
+html.dark .theme-icon-sun { display: none; }
+html.dark .theme-icon-moon { display: block; }
