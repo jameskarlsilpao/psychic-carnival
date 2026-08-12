@@ -63,7 +63,7 @@ def evaluate_ngas(request):
             'contract_value': None,
         })
 
-    df = pd.read_csv('C:/Users/reidj/Desktop/Portfolio2.0/main/portfolio/static/files/Nat_Gas.csv', parse_dates=['Dates'], index_col='Dates')
+    df = pd.read_csv('staticfiles/files/Nat_Gas.csv', parse_dates=['Dates'], index_col='Dates')
     df["Days"] = (df.index - df.index.min()).days
 
     # Define feature (X) and target (y) for simple linear regression
