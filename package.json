@@ -1,0 +1,5 @@
+{
+  "scripts": {
+    "tailwind": "npx @tailwindcss/cli -i main/portfolio/static/src/input.css -o main/portfolio/static/src/output.css --watch"
+  }
+}
