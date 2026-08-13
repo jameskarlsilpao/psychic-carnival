@@ -12,9 +12,8 @@
         <div class="relative w-full max-w-6xl max-h-[92vh] flex flex-col bg-white rounded-2xl shadow-2xl border border-zinc-200 overflow-hidden">
 
             <!-- Header -->
-            <header class=" flex items-start justify-between gap-4 px-6 py-5 sm:px-8 sm:py-6 border-b border-zinc-200 bg-linear-to-r from-amber-50 to-white">
+            <header class=" flex items-start justify-between gap-4 px-6 py-5 sm:px-8 sm:py-6 border-b border-zinc-200 bg-linear-to-r from-orange-500 to-orange-300">
                 <div class="min-w-0">
-                    <p class="text-xs font-semibold tracking-widest uppercase text-orange-600 mb-1">Live Demo</p>
                     <h2 id="ngas-title" class="text-2xl sm:text-3xl font-extrabold text-zinc-800 truncate">Natural Gas Contract Evaluation</h2>
                     <p class="mt-2 text-sm text-zinc-600 max-w-2xl">
                         Evaluates natural gas contracts using simple linear regression and time-series analysis on synthetic data — simulating future P&amp;L with applied sample fees.
@@ -167,16 +166,257 @@
                     </aside>
                 </div>
             </div>
+        </div>
+    </div>
+    <!-- Loan Default Evaluation modal demo -->
+    <div id="loan_df"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="loan-title"
+         class="{% if not show_loan_df %} hidden {% endif %} modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 md:p-10 bg-zinc-900/70 backdrop-blur-sm">
+        <div class="relative w-full max-w-6xl max-h-[92vh] flex flex-col bg-white rounded-2xl shadow-2xl border border-zinc-200 overflow-hidden">
 
-            <!-- Footer -->
-            <footer class="flex items-center justify-between gap-4 px-6 py-4 sm:px-8 border-t border-zinc-200 bg-white">
-                <p class="text-xs text-zinc-500">Synthetic data — for demonstration purposes only.</p>
+            <!-- Header -->
+            <header class=" flex items-start justify-between gap-4 px-6 py-5 sm:px-8 sm:py-6 border-b border-zinc-200 bg-linear-to-r from-orange-500 to-orange-300">
+                <div class="min-w-0">
+                    <h2 id="loan-title" class="text-2xl sm:text-3xl font-extrabold text-zinc-800 truncate">Loan Default Evaluation</h2>
+                    <p class="mt-2 text-sm text-zinc-600 max-w-2xl">Estimates a borrower’s probability of default with a logistic-regression model trained on loan performance data.</p>
+                    <p class="hidden">
+                        Evaluates natural gas contracts using simple linear regression and time-series analysis on synthetic data — simulating future P&amp;L with applied sample fees.
+                    </p>
+                </div>
                 <button type="button"
-                        onclick="hide_NGAS()"
-                        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-800 text-white text-sm font-semibold hover:bg-zinc-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-800 transition-colors">
-                    Close
+                        onclick="hide_loan_df()"
+                        aria-label="Close dialog"
+                        class="shrink-0 inline-flex items-center justify-center w-10 h-10 rounded-full text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
-            </footer>
+            </header>
+
+            {% comment %} Legacy NGAS markup accidentally copied into the Loan modal. {% endcomment %}
+            {% comment %}
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <!-- Chart card -->
+                    <section class="lg:col-span-7 bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
+                        <!-- Results -->
+                        <div class="px-5 pt-5 pb-3 border-b border-zinc-100">
+                            <div>
+                                <h3 class="bitcount-prop-single-pixel text-sm font-semibold text-zinc-700">Contract Evaluation Results</h3>
+                                <p class="text-xs text-zinc-500 mt-0.5">Projected P&amp;L across the configured windows.</p>
+                            </div>
+                        </div>
+                        <div id="results" class="px-5 pt-5 pb-3 border-b text-sm text-zinc-700 leading-relaxed">
+                            {% if contract_value is not None %}
+                                <p>Injection Dates: {{ in_dates|join:", " }}</p>
+                                <p>Withdrawal Dates: {{ output_dates|join:", " }}</p>
+                                <p>Predicted Injection Prices: {% for price in predicted_in_prices %}{{ price|floatformat:2 }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+                                <p>Predicted Withdrawal Prices: {% for price in predicted_out_prices %}{{ price|floatformat:2 }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+                                <p class="font-semibold">Valuation: {{ contract_value|floatformat:2 }}</p>
+                            {% else %}
+                                <p class="text-xs text-zinc-500 mt-0.5">No evaluation yet. Configure contract dates and click <span class="font-semibold not-italic text-zinc-700">Evaluate Contracts</span> to see projected P&amp;L.</p>
+                            {% endif %}
+                        </div>
+                        <div class="px-5 pt-5 pb-3 border-b border-zinc-100">
+                            <h3 class="bitcount-prop-single-pixel text-sm font-semibold text-zinc-700">Linear Regression Forecast</h3>
+                            <p class="text-xs text-zinc-500 mt-0.5">Predicted natural gas price vs. observed data.</p>
+                        </div>
+                        <div class="p-4 bg-zinc-50">
+                            <img src="{% static 'images/NGAS_Linear_Regression.png' %}"
+                                 alt="NGAS Linear Regression"
+                                 class="w-full h-auto max-h-105 object-contain rounded-lg bg-white">
+                        </div>
+                    </section>
+
+                    <!-- Side panel: forms + results -->
+                    <aside class="lg:col-span-5 flex flex-col gap-6">
+
+                        <!-- Contract dates form -->
+                        <form id='ngas_form' action="{% url 'evaluate_ngas' %}" method="get" class="bg-white rounded-xl border border-zinc-200 shadow-sm p-5 flex flex-col gap-4">
+                            <div>
+                                <h3 class="bitcount-prop-single-pixel text-base font-semibold text-zinc-800">Contract Windows</h3>
+                                <p class="text-xs text-zinc-500 mt-0.5">Select up to 3 injection / withdrawal date pairs from 2020-10-31 to 2025-09-01.</p>
+                                <p id="ngas_input_error" class="text-red-500 text-xs mt-1 {% if not ngas_error %}hidden{% endif %}">{{ ngas_error }}</p>
+                            </div>
+
+                            <div class="space-y-4">
+                                <!-- Pair 1 -->
+                                <div class="grid grid-cols-2 gap-3">
+                                    <label class="block">
+                                        <span class="text-xs font-medium text-zinc-600">Injection #1</span>
+                                        <input id="input-date-1" name="input-date-1" type="date" min="2020-10-31" max="2025-09-01"
+                                               class="mt-1 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                    </label>
+                                    <label class="block">
+                                        <span class="text-xs font-medium text-zinc-600">Withdrawal #1</span>
+                                        <input id="output-date-1" name="output-date-1" type="date" min="2020-10-31" max="2025-09-01"
+                                               class="mt-1 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                    </label>
+                                </div>
+                                <!-- Pair 2 -->
+                                <div class="grid grid-cols-2 gap-3">
+                                    <label class="block">
+                                        <span class="text-xs font-medium text-zinc-600">Injection #2</span>
+                                        <input id="input-date-2" name="input-date-2" type="date" min="2020-10-31" max="2025-09-01"
+                                               class="mt-1 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                    </label>
+                                    <label class="block">
+                                        <span class="text-xs font-medium text-zinc-600">Withdrawal #2</span>
+                                        <input id="output-date-2" name="output-date-2" type="date" min="2020-10-31" max="2025-09-01"
+                                               class="mt-1 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                    </label>
+                                </div>
+                                <!-- Pair 3 -->
+                                <div class="grid grid-cols-2 gap-3">
+                                    <label class="block">
+                                        <span class="text-xs font-medium text-zinc-600">Injection #3</span>
+                                        <input id="input-date-3" name="input-date-3" type="date" min="2020-10-31" max="2025-09-01"
+                                               class="mt-1 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                    </label>
+                                    <label class="block">
+                                        <span class="text-xs font-medium text-zinc-600">Withdrawal #3</span>
+                                        <input id="output-date-3" name="output-date-3" type="date" min="2020-10-31" max="2025-09-01"
+                                               class="mt-1 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                    </label>
+                                </div>
+                            </div>
+
+                            <button type="submit"
+                                    class="inline-flex items-center justify-center gap-2 mt-1 px-4 py-2.5 rounded-lg bg-orange-500 text-zinc-900 font-semibold text-sm hover:bg-orange-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors shadow-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-6h13M3 12h4M3 6h4M3 18h4"/></svg>
+                                Evaluate Contracts
+                            </button>
+                        </form>
+
+                        <!-- Fees form -->
+                        <form action="{% url 'set_ngas_fees' %}" method="post" class="bg-white rounded-xl border border-zinc-200 shadow-sm p-5 flex flex-col gap-4">
+                            {% csrf_token %}
+                            <div>
+                                <h3 class="bitcount-prop-single-pixel text-base font-semibold text-zinc-800">Fees Configuration</h3>
+                                <p class="text-xs text-zinc-500 mt-0.5">Applied per unit across all evaluated contracts.</p>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <label class="block">
+                                    <span class="text-xs font-medium text-zinc-600">Injection Fee</span>
+                                    <input id="InjectionFee" name="rate" type="number" step="0.01" min="0"
+                                           placeholder="{{ contract.injection_fee }}"
+                                           class="mt-1 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                </label>
+                                <label class="block">
+                                    <span class="text-xs font-medium text-zinc-600">Withdrawal Fee</span>
+                                    <input id="WithdrawalFee" name="injection_withdrawal_cost_rate" type="number" step="0.01" min="0"
+                                           placeholder="{{ contract.withdrawal_fee }}"
+                                           class="mt-1 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                </label>
+                                <label class="block">
+                                    <span class="text-xs font-medium text-zinc-600">Storage Fee</span>
+                                    <input id="StorageFee" name="storage_cost_rate" type="number" step="0.01" min="0"
+                                           placeholder="{{ contract.storage_fee }}"
+                                           class="mt-1 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                </label>
+                            </div>
+
+                            <div class="flex items-center gap-3">
+                                <button type="submit"
+                                        class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-2 border-zinc-800 text-zinc-800 font-semibold text-sm hover:bg-zinc-800 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-800 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                    Save Fees
+                                </button>
+                                <button type="submit" name="reset_fees" value="true"
+                                        class="inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-sm font-semibold text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5"/></svg>
+                                    Reset fees
+                                </button>
+                            </div>
+                        </form>
+                    </aside>
+                </div>
+            </div>
+            {% endcomment %}
+            <div class="flex-1 overflow-y-auto px-6 py-6 sm:px-8 sm:py-8 bg-zinc-50">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <section class="lg:col-span-7 bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
+                        <div class="px-5 pt-5 pb-3 border-b border-zinc-100">
+                            <h3 class="bitcount-prop-single-pixel text-sm font-semibold text-zinc-700">Default Evaluation Results</h3>
+                            <p class="text-xs text-zinc-500 mt-0.5">A prediction and model-performance snapshot for the current evaluation.</p>
+                        </div>
+
+                        {% if result is not None %}
+                            <div class="p-5 border-b border-zinc-100">
+                                <div class="rounded-lg border border-orange-200 bg-amber-50 p-4">
+                                    <p class="text-xs font-semibold uppercase tracking-wider text-zinc-600">Predicted outcome</p>
+                                    <p class="mt-1 text-xl font-bold text-zinc-800">{% if result %}Default risk detected{% else %}No default risk detected{% endif %}</p>
+                                    <p class="mt-2 text-sm text-zinc-600">Probability of default: <span class="font-semibold text-zinc-800">{{ default_probability|floatformat:1 }}%</span></p>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="px-5 py-6 border-b border-zinc-100 text-sm text-zinc-700 leading-relaxed">
+                                <p class="text-xs text-zinc-500">No evaluation yet. Complete the borrower profile and select <span class="font-semibold text-zinc-700">Run Evaluation</span> to see the model’s prediction.</p>
+                            </div>
+                        {% endif %}
+
+                        <div class="px-5 pt-5 pb-3 border-b border-zinc-100">
+                            <h3 class="bitcount-prop-single-pixel text-sm font-semibold text-zinc-700">Model Performance</h3>
+                            <p class="text-xs text-zinc-500 mt-0.5">Holdout metrics and calibration by predicted-default bin.</p>
+                        </div>
+                        <div class="p-5 space-y-5">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="rounded-lg bg-zinc-50 border border-zinc-100 p-4">
+                                    <p class="text-xs font-medium text-zinc-500">Accuracy</p>
+                                    <p class="mt-1 text-lg font-bold text-zinc-800">{{ accuracy|floatformat:3 }}</p>
+                                </div>
+                                <div class="rounded-lg bg-zinc-50 border border-zinc-100 p-4">
+                                    <p class="text-xs font-medium text-zinc-500">ROC AUC</p>
+                                    <p class="mt-1 text-lg font-bold text-zinc-800">{{ ROCAUC|floatformat:3 }}</p>
+                                </div>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full min-w-125 text-left text-xs text-zinc-700">
+                                    <thead class="border-b border-zinc-200 text-zinc-500">
+                                        <tr><th class="px-2 py-2 font-semibold">PD Bin</th><th class="px-2 py-2 font-semibold">Predicted PD</th><th class="px-2 py-2 font-semibold">Actual Default Rate</th><th class="px-2 py-2 font-semibold">Count</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for row in summary %}
+                                            <tr class="border-b border-zinc-100 last:border-0"><td class="px-2 py-2">{{ row.pd_bin }}</td><td class="px-2 py-2">{{ row.predicted_pd|floatformat:3 }}</td><td class="px-2 py-2">{{ row.actual_default_rate|floatformat:3 }}</td><td class="px-2 py-2">{{ row.count }}</td></tr>
+                                        {% empty %}
+                                            <tr><td colspan="4" class="px-2 py-3 text-zinc-500">Run an evaluation to load the model summary.</td></tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+
+                    <aside class="lg:col-span-5 flex flex-col gap-6">
+                        <form id="loan_form" action="{% url 'evaluate_default' %}" method="get" class="bg-white rounded-xl border border-zinc-200 shadow-sm p-5 flex flex-col gap-4">
+                            <div>
+                                <h3 class="bitcount-prop-single-pixel text-base font-semibold text-zinc-800">Borrower Profile</h3>
+                                <p class="text-xs text-zinc-500 mt-0.5">Provide the current loan and borrower details for a default-risk estimate.</p>
+                                <p id="loan_input_error" class="text-red-500 text-xs mt-1 {% if not loan_error %}hidden{% endif %}">{{ loan_error }}</p>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <label class="block"><span class="text-xs font-medium text-zinc-600">Credit Lines Outstanding</span><input name="credit_lines_outstanding" type="number" step="1" min="0" required value="{{ loan_inputs.credit_lines_outstanding|default_if_none:'' }}" class="mt-1 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"></label>
+                                <label class="block"><span class="text-xs font-medium text-zinc-600">Loan Amount Outstanding</span><input name="loan_amt_outstanding" type="number" step="0.01" min="0" required value="{{ loan_inputs.loan_amt_outstanding|default_if_none:'' }}" class="mt-1 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"></label>
+                                <label class="block"><span class="text-xs font-medium text-zinc-600">Total Debt Outstanding</span><input name="total_debt_outstanding" type="number" step="0.01" min="0" required value="{{ loan_inputs.total_debt_outstanding|default_if_none:'' }}" class="mt-1 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"></label>
+                                <label class="block"><span class="text-xs font-medium text-zinc-600">Years Employed</span><input name="years_employed" type="number" step="0.1" min="0" required value="{{ loan_inputs.years_employed|default_if_none:'' }}" class="mt-1 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"></label>
+                                <label class="block"><span class="text-xs font-medium text-zinc-600">Annual Income</span><input name="income" type="number" step="0.01" min="0.01" required value="{{ loan_inputs.income|default_if_none:'' }}" class="mt-1 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"></label>
+                                <label class="block"><span class="text-xs font-medium text-zinc-600">FICO Score</span><input name="fico_score" type="number" step="1" min="0" max="900" required value="{{ loan_inputs.fico_score|default_if_none:'' }}" class="mt-1 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-800 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"></label>
+                            </div>
+                            <button type="submit" class="inline-flex items-center justify-center gap-2 mt-1 px-4 py-2.5 rounded-lg bg-orange-500 text-zinc-900 font-semibold text-sm hover:bg-orange-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors shadow-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-6h13M3 12h4M3 6h4M3 18h4"/></svg>
+                                Run Evaluation
+                            </button>
+                        </form>
+                        <section class="bg-white rounded-xl border border-zinc-200 shadow-sm p-5">
+                            <h3 class="bitcount-prop-single-pixel text-base font-semibold text-zinc-800">Model Inputs</h3>
+                            <p class="mt-1 text-xs text-zinc-500">The model derives debt-to-income and payment-to-income ratios from the values above, then evaluates five risk features.</p>
+                            {% if coeficient %}
+                                <details class="mt-4 text-xs text-zinc-600"><summary class="cursor-pointer font-semibold text-zinc-700">View model parameters</summary><p class="mt-2 break-words">Coefficients: {{ coeficient }}</p><p class="mt-1 break-words">Intercept: {{ intercept|floatformat:4 }}</p></details>
+                            {% endif %}
+                        </section>
+                    </aside>
+                </div>
+            </div>
         </div>
     </div>
     <div class="w-full flex flex-col md:flex-row align-middle justify-center items-center top-30 absolute px-4 gap-6">
@@ -254,10 +494,11 @@
                             <h3 class="bitcount-prop-single-pixel text-2xl font-bold text-zinc-800 mb-2">Loan Default Evaluation</h3>
                             <p class="text-zinc-600 text-sm mb-4">A machine learning project for evaluating loan defaults using various classification algorithms and risk metrics.</p>
                             <div class="flex flex-wrap gap-3">
-                                <button onclick="show_Loan_Default()" class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-500 text-zinc-900 font-semibold text-sm hover:bg-orange-600 hover:text-white transition-colors duration-200 shadow-sm">
+                                <button type="button" onclick="show_loan_df()" class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-500 text-zinc-900 font-semibold text-sm hover:bg-orange-600 hover:text-white transition-colors duration-200 shadow-sm">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-5.197-3.029A1 1 0 008 9v6a1 1 0 001.555.832l5.197-3.03a1 1 0 000-1.664z"/></svg>
                                     Live Demo
                                 </button>
+
                                 <a href="https://github.com/jameskarlsilpao/Loan-Default-Evaluation" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-4 py-2 rounded-full border-2 border-zinc-800 text-zinc-800 font-semibold text-sm hover:bg-zinc-800 hover:text-white transition-colors duration-200">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.73.5.9 5.33.9 11.6c0 4.89 3.17 9.04 7.56 10.5.55.1.75-.24.75-.54v-2.1c-3.07.67-3.72-1.31-3.72-1.31-.5-1.28-1.22-1.62-1.22-1.62-1-.69.08-.68.08-.68 1.11.08 1.69 1.14 1.69 1.14.99 1.69 2.6 1.2 3.23.92.1-.72.39-1.2.71-1.48-2.45-.28-5.03-1.23-5.03-5.46 0-1.21.43-2.19 1.14-2.96-.11-.28-.49-1.41.11-2.94 0 0 .93-.3 3.05 1.13a10.6 10.6 0 015.55 0c2.12-1.43 3.05-1.13 3.05-1.13.6 1.53.22 2.66.11 2.94.71.77 1.14 1.75 1.14 2.96 0 4.24-2.59 5.17-5.05 5.45.4.34.76 1.02.76 2.06v3.05c0 .3.2.65.76.54 4.39-1.46 7.55-5.61 7.55-10.5C23.1 5.33 18.27.5 12 .5z"/></svg>
                                     Repository

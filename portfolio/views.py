@@ -3,7 +3,9 @@ from datetime import datetime
 
 from django.shortcuts import render, redirect
 import pandas as pd
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LinearRegression, LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import roc_curve, roc_auc_score
 
 # Create your views here.
 def index(request):
@@ -215,3 +217,119 @@ def set_ngas_fees(request):
                 request.session['injection_withdrawal_cost_rate'] = request.POST.get('injection_withdrawal_cost_rate')
     #return redirect(request.META.get('HTTP_REFERER', '/'))
     return render(request, 'index.html',{'show_ngas': True})
+
+def evaluate_default(request):
+    # Read incoming GET parameters (if present)
+    try:
+        credit_lines_outstanding = request.GET.get('credit_lines_outstanding')
+        loan_amt_outstanding = request.GET.get('loan_amt_outstanding')
+        total_debt_outstanding = request.GET.get('total_debt_outstanding')
+        years_employed = request.GET.get('years_employed')
+        income = request.GET.get('income')
+        fico_score = request.GET.get('fico_score')
+        loan_inputs = {
+            'credit_lines_outstanding': credit_lines_outstanding,
+            'loan_amt_outstanding': loan_amt_outstanding,
+            'total_debt_outstanding': total_debt_outstanding,
+            'years_employed': years_employed,
+            'income': income,
+            'fico_score': fico_score,
+        }
+
+        # Convert to numeric where provided, otherwise keep None
+        def to_num(v):
+            try:
+                return float(v)
+            except (TypeError, ValueError):
+                return None
+
+        credit_lines_outstanding_n = to_num(credit_lines_outstanding)
+        loan_amt_outstanding_n = to_num(loan_amt_outstanding)
+        total_debt_outstanding_n = to_num(total_debt_outstanding)
+        years_employed_n = to_num(years_employed)
+        income_n = to_num(income)
+        fico_score_n = to_num(fico_score)
+
+        # compute derived ratios for the user input if possible
+        payment_to_income_n = None
+        debt_to_income_n = None
+        if loan_amt_outstanding_n is not None and income_n and income_n != 0:
+            payment_to_income_n = loan_amt_outstanding_n / income_n
+        if total_debt_outstanding_n is not None and income_n and income_n != 0:
+            debt_to_income_n = total_debt_outstanding_n / income_n
+
+        if None in (credit_lines_outstanding_n, loan_amt_outstanding_n, total_debt_outstanding_n, years_employed_n, income_n, fico_score_n) or income_n <= 0:
+            return render(request, 'index.html', {
+                'show_loan_df': True,
+                'loan_error': 'Complete every field and use an income greater than zero.',
+                'loan_inputs': loan_inputs,
+            })
+
+        user_input = [[
+            credit_lines_outstanding_n,
+            debt_to_income_n,
+            payment_to_income_n,
+            years_employed_n,
+            fico_score_n
+        ]]
+    except Exception:
+        return render(request, 'index.html', {
+            'show_loan_df': True,
+            'loan_error': 'Invalid input values.',
+            'loan_inputs': request.GET,
+        })
+
+    # Load dataset and prepare training data
+    df = pd.read_csv('portfolio/static/files/Task 3 and 4_Loan_Data.csv')
+    # derived features
+    df['payment_to_income'] = df['loan_amt_outstanding'] / df['income']
+    df['debt_to_income'] = df['total_debt_outstanding'] / df['income']
+
+    features = ['credit_lines_outstanding', 'debt_to_income', 'payment_to_income', 'years_employed', 'fico_score']
+    X = df[features]
+    y = df['default']
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    CLF = LogisticRegression(random_state=0, solver='liblinear', tol=1e-5, max_iter=10000)
+    CLF.fit(X_train, y_train)
+
+    y_prob = CLF.predict_proba(X_test)[:, 1]
+
+    fpr, tpr, thresholds = roc_curve(y_test, y_prob)
+    accuracy = (CLF.predict(X_test) == y_test).mean()
+    ROCAUC = roc_auc_score(y_test, y_prob)
+
+    df_test = X_test.copy()
+    df_test['actual_default'] = y_test.values
+    df_test['predicted_pd'] = y_prob
+
+    # Create PD bins and summary
+    df_test['pd_bin'] = pd.qcut(df_test['predicted_pd'], q=10, duplicates='drop')
+    summary = (
+        df_test.groupby('pd_bin', observed=True)
+        .agg(predicted_pd=('predicted_pd', 'mean'), actual_default_rate=('actual_default', 'mean'), count=('actual_default', 'size'))
+        .reset_index()
+    )
+
+    # Convert summary to records so template can iterate
+    summary_records = summary.to_dict(orient='records')
+
+    context = {
+        'show_loan_df': True,
+        'loan_inputs': loan_inputs,
+        'coeficient': CLF.coef_.tolist(),
+        'intercept': float(CLF.intercept_[0]) if hasattr(CLF.intercept_, '__len__') else float(CLF.intercept_),
+        'accuracy': float(accuracy),
+        'ROCAUC': float(ROCAUC),
+        'summary': summary_records,
+    }
+
+    if user_input is not None:
+        pred = CLF.predict(user_input)
+        pred_proba = CLF.predict_proba(user_input)
+        context['result'] = int(pred[0])
+        context['result_probability'] = pred_proba[0].tolist()
+        context['default_probability'] = float(pred_proba[0][1] * 100)
+
+    return render(request, 'index.html', context)
