@@ -10,9 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
-import os,dj_database_url
+import os
 from dotenv import load_dotenv
+import dj_database_url
 from pathlib import Path
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -73,19 +76,28 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'main.wsgi.application'
 
-if os.environ.get("ENVIRONMENT") == "PRODUCTION":
-    DATABASES = {'default': dj_database_url.config(conn_max_age=600, ssl_require=True)}
+
+# Database
+# https://docs.djangoproject.com/en/6.1/ref/settings/#databases
+
+ENVIRONMENT = os.getenv('ENVIRONMENT', 'DEVELOPMENT').upper()
+
+if ENVIRONMENT == 'PRODUCTION':
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.getenv('DATABASE_URL'),
+            conn_max_age=600,
+            ssl_require=True,
+        )
+    }
 else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': 'postgres',
-            'USER': 'postgres',
-            'PASSWORD': os.getenv('DB_PASSWORD'),
-            'HOST': os.getenv('DB_HOST'),
-            'PORT': '5432',
+            'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/6.1/ref/settings/#auth-password-validators
