@@ -419,7 +419,7 @@
             </div>
         </div>
     </div>
-    <div class="w-full flex flex-col md:flex-row align-middle justify-center items-center top-30 absolute px-4 gap-6">
+    <div id="about" class="w-full flex flex-col md:flex-row align-middle justify-center items-center top-30 absolute px-4 gap-6">
         <div class="w-full md:w-1/4 h-auto md:h-100 flex flex-col justify-center items-center gap-4">
             <h1 class="text-2xl font-bold bitcount-prop-single-pixel text-center">HELLO THERE!</h1>
             <p class="text-justify">I am James Karl Silpao, a results-driven Data Analyst skilled in data analysis and business intelligence. I transform data into actionable insights that support better decisions and business performance. I am eager to apply my technical and analytical skills to your organization.</p>
@@ -666,7 +666,7 @@
     <section id="skills" class="relative w-full mt-0 md:mt-0 px-4 py-16">
         <div class="max-w-6xl mx-auto">
             <!-- Header -->
-            <div class="text-center mb-16">
+            <div class="text-center mb-5">
                 <p class="text-orange-600 font-semibold tracking-widest uppercase text-xs mb-3">Technical Expertise</p>
                 <h2 class="text-4xl md:text-5xl font-extrabold text-zinc-800 bitcount-prop-single-pixel mb-4">Core Competencies</h2>
             </div>
@@ -677,7 +677,7 @@
                 <!-- Programming Languages -->
                 <div class="group  relative bg-white rounded-2xl border border-zinc-200 shadow-md hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 p-6 overflow-hidden">
                     <div class="absolute inset-0 bg-linear-to-br from-orange-500/5 to-transparent opacopacity-100 transition-opacity duration-300"></div>
-                    <div class="relative">
+                    <div class="relative size-0.6">
                         <div class="flex items-center gap-3 mb-4">
                             <h3 class="text-lg font-bold text-zinc-800">Programming Languages</h3>
                         </div>
@@ -713,7 +713,7 @@
                 <!-- Data Analytics & BI Tools -->
                 <div class="group  relative bg-white rounded-2xl border border-zinc-200 shadow-md hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 p-6 overflow-hidden">
                     <div class="absolute inset-0 bg-linear-to-br from-blue-500/5 to-transparent opacopacity-100 transition-opacity duration-300"></div>
-                    <div class="relative">
+                    <div class="relative size-0.6">
                         <div class="flex items-center gap-3 mb-4">
                             <h3 class="text-lg font-bold text-zinc-800">Analytics & BI Tools</h3>
                         </div>
@@ -741,7 +741,7 @@
                 <!-- Cloud & Big Data -->
                 <div class="group  relative bg-white rounded-2xl border border-zinc-200 shadow-md hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 p-6 overflow-hidden">
                     <div class="absolute inset-0 bg-linear-to-br from-purple-500/5 to-transparent opacopacity-100 transition-opacity duration-300"></div>
-                    <div class="relative">
+                    <div class="relative size-0.6">
                         <div class="flex items-center gap-3 mb-4">
                             <h3 class="text-lg font-bold text-zinc-800">Cloud & Big Data</h3>
                         </div>
@@ -769,7 +769,7 @@
                 <!-- Machine Learning -->
                 <div class="group  relative bg-white rounded-2xl border border-zinc-200 shadow-md hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 p-6 overflow-hidden">
                     <div class="absolute inset-0 bg-linear-to-br from-green-500/5 to-transparent opacopacity-100 transition-opacity duration-300"></div>
-                    <div class="relative">
+                    <div class="relative size-0.6">
                         <div class="flex items-center gap-3 mb-4">
                             <h3 class="text-lg font-bold text-zinc-800">Machine Learning</h3>
                         </div>
@@ -797,7 +797,7 @@
                 <!-- Web & Backend -->
                 <div class="group  relative bg-white rounded-2xl border border-zinc-200 shadow-md hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 p-6 overflow-hidden">
                     <div class="absolute inset-0 bg-linear-to-br from-indigo-500/5 to-transparent opacopacity-100 transition-opacity duration-300"></div>
-                    <div class="relative">
+                    <div class="relative size-0.6">
                         <div class="flex items-center gap-3 mb-4">
                             <h3 class="text-lg font-bold text-zinc-800">Web & Backend</h3>
                         </div>
@@ -825,7 +825,7 @@
                 <!-- Professional Skills -->
                 <div class="group  relative bg-white rounded-2xl border border-zinc-200 shadow-md hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 p-6 overflow-hidden">
                     <div class="absolute inset-0 bg-linear-to-br from-rose-500/5 to-transparent opacopacity-100 transition-opacity duration-300"></div>
-                    <div class="relative">
+                    <div class="relative size-0.6">
                         <div class="flex items-center gap-3 mb-4">
                             <h3 class="text-lg font-bold text-zinc-800">Professional Skills</h3>
                         </div>
@@ -853,25 +853,86 @@
         </div>
     </section>
 
-    <script>
-        // Reveal project cards as they scroll into view
-        document.addEventListener('DOMContentLoaded', () => {
-            const cards = document.querySelectorAll('.project-card');
-            if (!('IntersectionObserver' in window)) {
-                cards.forEach(c => c.classList.add('is-visible'));
-                return;
-            }
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach((entry, index) => {
-                    if (entry.isIntersecting) {
-                        // Stagger the animation slightly per card
-                        setTimeout(() => entry.target.classList.add('is-visible'), index * 120);
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
-            cards.forEach(card => observer.observe(card));
-        });
-    </script>
+    <!-- Contact Section -->
+    <section id="contact" class="relative w-full px-4 py-16">
+        <div class="max-w-4xl mx-auto">
+            <!-- Header -->
+            <div class="text-center mb-12">
+                <p class="text-orange-600 font-semibold tracking-widest uppercase text-xs mb-3">Get in Touch</p>
+                <h2 class="text-4xl md:text-5xl font-extrabold text-zinc-800 bitcount-prop-single-pixel mb-4">Let's Connect</h2>
+            </div>
 
+            <!-- Contact Form -->
+            <div class="bg-zinc-50 rounded-3xl border border-zinc-200 shadow-lg p-8 md:p-12">
+                {% if contact_message %}
+                    <div class="mb-6 p-4 rounded-lg {% if contact_success %}bg-green-50 border border-green-200{% else %}bg-red-50 border border-red-200{% endif %}">
+                        <p class="text-sm font-semibold {% if contact_success %}text-green-800{% else %}text-red-800{% endif %}">
+                            {{ contact_message }}
+                        </p>
+                    </div>
+                {% endif %}
+
+                <form method="POST" action="{% url 'contact' %}" class="space-y-6">
+                    {% csrf_token %}
+                    <div class="flex w-full justify-evenly items-center">
+                        <div class="w-1/3">
+                            <!-- Name Field -->
+                            <div>
+                                <label for="name" class="block text-2xl bitcount-prop-single-pixel font-semibold text-zinc-700 mb-2">Full Name</label>
+                                <input type="text" id="name" name="name" required
+                                    class="w-full px-4 py-3 h-5 rounded-lg border border-zinc-300 text-zinc-800 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                                    placeholder="John Doe">
+                            </div>
+
+                            <!-- Email Field -->
+                            <div>
+                                <label for="email" class="block text-2xl bitcount-prop-single-pixel font-semibold text-zinc-700 mb-2">Email Address</label>
+                                <input type="email" id="email" name="email" required
+                                    class="w-full px-4 py-3 h-5 rounded-lg border border-zinc-300 text-zinc-800 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                                    placeholder="john@example.com">
+                            </div>
+
+                            <!-- Subject Field -->
+                            <div>
+                                <label for="subject" class="block text-2xl bitcount-prop-single-pixel font-semibold text-zinc-700 mb-2">Subject</label>
+                                <input type="text" id="subject" name="subject" required
+                                    class="w-full px-4 py-3 h-5 rounded-lg border border-zinc-300 text-zinc-800 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                                    placeholder="What is this about?">
+                            </div>
+                        </div>
+                        <!-- Message Field -->
+                        <div class="w-2/4">
+                            <label for="message" class="block text-2xl bitcount-prop-single-pixel font-semibold text-zinc-700 mb-2">Message</label>
+                            <textarea id="message" name="message" required rows="6"
+                                    class="w-full px-4 py-3 rounded-lg border border-zinc-300 text-zinc-800 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all resize-none"
+                                    placeholder="Your message here..."></textarea>
+                        </div>
+                    </div>
+                    <!-- Submit Button -->
+                    <div class="flex items-center justify-center gap-3 pt-4 w-full ">
+                        <button
+                            type="submit"
+                            class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-orange-500 text-white font-semibold text-sm hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-all shadow-sm"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="w-4 h-4"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                stroke-width="2"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2v10a2 2 0 002 2z"
+                                />
+                            </svg>
+                            Send Message
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
 {% endblock %}

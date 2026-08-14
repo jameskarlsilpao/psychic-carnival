@@ -179,6 +179,6 @@ html:not(.dark) .site-header__surface {
     box-shadow: 0 16px 38px rgb(15 23 42 / .12), inset 0 1px 0 #fff;
 }
 html:not(.dark) .site-brand, html:not(.dark) .site-header a { color: #172033; }
-html:not(.dark) .site-header nav a:hover { color: #9a3412; background: rgb(249 115 22 / .1); }
+html:not(.dark) .site-header nav a:hover { color: #9a3412; background: rgba(249, 116, 22, 0.795); }
 html:not(.dark) .theme-toggle { color: #172033; background: #fff7ed; border-color: rgb(234 88 12 / .38); }
 html:not(.dark) .theme-toggle:hover { color: #111827; background: #f97316; }

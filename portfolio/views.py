@@ -2,10 +2,13 @@ import math
 from datetime import datetime
 
 from django.shortcuts import render, redirect
+from django.core.mail import send_mail
+from django.conf import settings
 import pandas as pd
 from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_curve, roc_auc_score
+from .models import ContactMessage
 
 # Create your views here.
 def index(request):
@@ -333,3 +336,78 @@ def evaluate_default(request):
         context['default_probability'] = float(pred_proba[0][1] * 100)
 
     return render(request, 'index.html', context)
+
+
+def contact(request):
+    contact_message = None
+    contact_success = False
+
+    if request.method == "POST":
+        name = request.POST.get("name", "").strip()
+        email = request.POST.get("email", "").strip()
+        subject = request.POST.get("subject", "").strip()
+        message = request.POST.get("message", "").strip()
+
+        if not all([name, email, subject, message]):
+            contact_message = "All fields are required."
+
+        else:
+            try:
+                # Save to database
+                ContactMessage.objects.create(
+                    name=name,
+                    email=email,
+                    subject=subject,
+                    message=message
+                )
+
+                # Send message to you
+                send_mail(
+                    subject=f"New Contact Form Submission: {subject}",
+                    message=(
+                        f"Name: {name}\n"
+                        f"Email: {email}\n\n"
+                        f"Message:\n{message}"
+                    ),
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=["jameskarlsilpao@gmail.com"],
+                    fail_silently=False,
+                )
+
+                # Confirmation to visitor
+                send_mail(
+                    subject="We received your message",
+                    message=(
+                        f"Hi {name},\n\n"
+                        "Thank you for reaching out! "
+                        "I've received your message and will get back to you soon.\n\n"
+                        "Best regards,\n"
+                        "James"
+                    ),
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[email],
+                    fail_silently=False,
+                )
+
+                contact_message = (
+                    "Thank you for your message! "
+                    "I'll get back to you soon."
+                )
+                contact_success = True
+
+            except Exception as e:
+                print("EMAIL ERROR:", e)
+                contact_message = (
+                    "Error sending message. Please try again."
+                )
+
+        return render(
+            request,
+            "index.html",
+            {
+                "contact_message": contact_message,
+                "contact_success": contact_success,
+            },
+        )
+
+    return redirect("index")
