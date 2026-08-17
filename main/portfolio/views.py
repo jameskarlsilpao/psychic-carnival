@@ -386,9 +386,8 @@ def evaluate_car(request):
     y = df['class']
 
     import xgboost as xgb
-    from sklearn.model_selection import train_test_split, GridSearchCV
-    from sklearn.metrics import accuracy_score, precision_score, f1_score, recall_score, confusion_matrix
-    import numpy as np # Added for np.unique
+    from sklearn.model_selection import train_test_split
+    from sklearn.metrics import accuracy_score, precision_score, f1_score, recall_score
 
     # Split the data into training and testing sets
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
