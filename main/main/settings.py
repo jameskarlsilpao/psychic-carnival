@@ -142,7 +142,14 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles/')
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
 MAILERS = {
-    'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
+    "default": {
+        "BACKEND": "django.core.mail.backends.smtp.EmailBackend",
+        "OPTIONS": {
+            "host": "smtp.gmail.com",
+            "port": 587,
+            "username": os.environ.get("EMAIL_HOST_USER"),
+            "password": os.environ.get("EMAIL_HOST_PASSWORD"),
+            "use_tls": True,
+        },
     },
 }

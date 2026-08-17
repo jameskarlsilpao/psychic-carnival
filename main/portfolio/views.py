@@ -2,8 +2,13 @@ import math
 from datetime import datetime
 
 from django.shortcuts import render, redirect
+from django.core.mail import send_mail
+from django.conf import settings
 import pandas as pd
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LinearRegression, LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import roc_curve, roc_auc_score
+from .models import ContactMessage
 
 # Create your views here.
 def index(request):
@@ -215,3 +220,281 @@ def set_ngas_fees(request):
                 request.session['injection_withdrawal_cost_rate'] = request.POST.get('injection_withdrawal_cost_rate')
     #return redirect(request.META.get('HTTP_REFERER', '/'))
     return render(request, 'index.html',{'show_ngas': True})
+
+def evaluate_default(request):
+    # Read incoming GET parameters (if present)
+    try:
+        credit_lines_outstanding = request.GET.get('credit_lines_outstanding')
+        loan_amt_outstanding = request.GET.get('loan_amt_outstanding')
+        total_debt_outstanding = request.GET.get('total_debt_outstanding')
+        years_employed = request.GET.get('years_employed')
+        income = request.GET.get('income')
+        fico_score = request.GET.get('fico_score')
+        loan_inputs = {
+            'credit_lines_outstanding': credit_lines_outstanding,
+            'loan_amt_outstanding': loan_amt_outstanding,
+            'total_debt_outstanding': total_debt_outstanding,
+            'years_employed': years_employed,
+            'income': income,
+            'fico_score': fico_score,
+        }
+
+        # Convert to numeric where provided, otherwise keep None
+        def to_num(v):
+            try:
+                return float(v)
+            except (TypeError, ValueError):
+                return None
+
+        credit_lines_outstanding_n = to_num(credit_lines_outstanding)
+        loan_amt_outstanding_n = to_num(loan_amt_outstanding)
+        total_debt_outstanding_n = to_num(total_debt_outstanding)
+        years_employed_n = to_num(years_employed)
+        income_n = to_num(income)
+        fico_score_n = to_num(fico_score)
+
+        # compute derived ratios for the user input if possible
+        payment_to_income_n = None
+        debt_to_income_n = None
+        if loan_amt_outstanding_n is not None and income_n and income_n != 0:
+            payment_to_income_n = loan_amt_outstanding_n / income_n
+        if total_debt_outstanding_n is not None and income_n and income_n != 0:
+            debt_to_income_n = total_debt_outstanding_n / income_n
+
+        if None in (credit_lines_outstanding_n, loan_amt_outstanding_n, total_debt_outstanding_n, years_employed_n, income_n, fico_score_n) or income_n <= 0:
+            return render(request, 'index.html', {
+                'show_loan_df': True,
+                'loan_error': 'Complete every field and use an income greater than zero.',
+                'loan_inputs': loan_inputs,
+            })
+
+        user_input = [[
+            credit_lines_outstanding_n,
+            debt_to_income_n,
+            payment_to_income_n,
+            years_employed_n,
+            fico_score_n
+        ]]
+    except Exception:
+        return render(request, 'index.html', {
+            'show_loan_df': True,
+            'loan_error': 'Invalid input values.',
+            'loan_inputs': request.GET,
+        })
+
+    # Load dataset and prepare training data
+    df = pd.read_csv('portfolio/static/files/Task 3 and 4_Loan_Data.csv')
+    # derived features
+    df['payment_to_income'] = df['loan_amt_outstanding'] / df['income']
+    df['debt_to_income'] = df['total_debt_outstanding'] / df['income']
+
+    features = ['credit_lines_outstanding', 'debt_to_income', 'payment_to_income', 'years_employed', 'fico_score']
+    X = df[features]
+    y = df['default']
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    CLF = LogisticRegression(random_state=0, solver='liblinear', tol=1e-5, max_iter=10000)
+    CLF.fit(X_train, y_train)
+
+    y_prob = CLF.predict_proba(X_test)[:, 1]
+
+    fpr, tpr, thresholds = roc_curve(y_test, y_prob)
+    accuracy = (CLF.predict(X_test) == y_test).mean()
+    ROCAUC = roc_auc_score(y_test, y_prob)
+
+    df_test = X_test.copy()
+    df_test['actual_default'] = y_test.values
+    df_test['predicted_pd'] = y_prob
+
+    # Create PD bins and summary
+    df_test['pd_bin'] = pd.qcut(df_test['predicted_pd'], q=10, duplicates='drop')
+    summary = (
+        df_test.groupby('pd_bin', observed=True)
+        .agg(predicted_pd=('predicted_pd', 'mean'), actual_default_rate=('actual_default', 'mean'), count=('actual_default', 'size'))
+        .reset_index()
+    )
+
+    # Convert summary to records so template can iterate
+    summary_records = summary.to_dict(orient='records')
+
+    context = {
+        'show_loan_df': True,
+        'loan_inputs': loan_inputs,
+        'coeficient': CLF.coef_.tolist(),
+        'intercept': float(CLF.intercept_[0]) if hasattr(CLF.intercept_, '__len__') else float(CLF.intercept_),
+        'accuracy': float(accuracy),
+        'ROCAUC': float(ROCAUC),
+        'summary': summary_records,
+    }
+
+    if user_input is not None:
+        pred = CLF.predict(user_input)
+        pred_proba = CLF.predict_proba(user_input)
+        context['result'] = int(pred[0])
+        context['result_probability'] = pred_proba[0].tolist()
+        context['default_probability'] = float(pred_proba[0][1] * 100)
+
+    return render(request, 'index.html', context)
+
+def evaluate_car(request):
+    try:
+        Buying_Price = request.GET.get('Buying_Price')
+        Maintenance_Cost = request.GET.get('Maintenance_Cost')
+        Number_of_Persons = request.GET.get('Number_of_Persons')
+        Number_of_Doors = request.GET.get('Number_of_Doors')
+        Luggage_Boot_Size = request.GET.get('Luggage_Boot_Size')
+        Safety = request.GET.get('Safety')
+        car_inputs = {
+            'Buying_Price': Buying_Price,
+            'Maintenance_Cost': Maintenance_Cost,
+            'Number_of_Persons': Number_of_Persons,
+            'Number_of_Doors': Number_of_Doors,
+            'Luggage_Boot_Size': Luggage_Boot_Size,
+            'Safety': Safety,
+        }
+    except Exception:
+            return render(request, 'index.html', {
+                'show_car_eval': True,
+                'car_eval_input_error': 'Invalid input values.',
+                'car_inputs': request.GET,
+            })
+
+    cols = ['Buying', 'maint', 'doors', 'persons', 'lug_boot', 'safety', 'class']
+    df = pd.read_csv("portfolio/static/files/car.data", names=cols)
+
+    # Define mappings for ordinal features
+    buying_maint_map = {'vhigh': 4, 'high': 3, 'med': 2, 'low': 1}
+    doors_persons_map = {'2': 2, '3': 3, '4': 4, '5more': 5, 'more': 5}
+    lug_boot_map = {'small': 1, 'med': 2, 'big': 3}
+    safety_map = {'low': 1, 'med': 2, 'high': 3}
+    class_map = {'unacc': 0, 'acc': 1, 'good': 2, 'vgood': 3}
+
+    # Apply mappings to convert categorical features to numerical
+    df['Buying'] = df['Buying'].map(buying_maint_map)
+    df['maint'] = df['maint'].map(buying_maint_map)
+    df['doors'] = df['doors'].map(doors_persons_map)
+    df['persons'] = df['persons'].map(doors_persons_map)
+    df['lug_boot'] = df['lug_boot'].map(lug_boot_map)
+    df['safety'] = df['safety'].map(safety_map)
+
+    # Convert the target variable 'class' to numerical
+    df['class'] = df['class'].map(class_map)
+
+    # Separate features (X) and target (y)
+    X = df.drop('class', axis=1)
+    y = df['class']
+
+    import xgboost as xgb
+    from sklearn.model_selection import train_test_split, GridSearchCV
+    from sklearn.metrics import accuracy_score, precision_score, f1_score, recall_score, confusion_matrix
+    import numpy as np # Added for np.unique
+
+    # Split the data into training and testing sets
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    best_xgb_model = xgb.XGBClassifier()
+    best_xgb_model.load_model('portfolio/static/files/car_eval_xgboost')
+
+    # Fit GridSearchCV to the training data
+    best_xgb_y_pred = best_xgb_model.predict(X_test)
+
+    Buying_Price =buying_maint_map.get(Buying_Price)
+    Maintenance_Cost = buying_maint_map.get(Maintenance_Cost)
+    Number_of_Doors = doors_persons_map.get(Number_of_Doors)
+    Number_of_Persons = doors_persons_map.get(Number_of_Persons)
+    Luggage_Boot_Size = lug_boot_map.get(Luggage_Boot_Size)
+    Safety = safety_map.get(Safety)
+
+    to_predict = pd.DataFrame({'Buying': [Buying_Price],
+    'maint': [Maintenance_Cost],
+    'doors': [Number_of_Doors],
+    'persons': [Number_of_Persons],
+    'lug_boot': [Luggage_Boot_Size],
+    'safety': [Safety]})
+
+    class_map = {0:'Unacceptable' , 1:'Acceptable', 2:'Good', 3:'Very Good'}
+
+    result = best_xgb_model.predict(to_predict)
+    result = class_map[int(result[0])]
+
+    accuracy = accuracy_score(y_test, best_xgb_y_pred)
+    f1 = f1_score(y_test, best_xgb_y_pred, average='weighted')
+    precision = precision_score(y_test, best_xgb_y_pred, average='weighted')
+    recall = recall_score(y_test, best_xgb_y_pred, average='weighted')
+    
+    return render(request, 'index.html', {'accuracy':accuracy, 'f1':f1, 'precision':precision, 'recall':recall, 'result':result, 'show_car_eval':True, 'car_inputs': request.GET})
+
+def contact(request):
+    contact_message = None
+    contact_success = False
+
+    if request.method == "POST":
+        name = request.POST.get("name", "").strip()
+        email = request.POST.get("email", "").strip()
+        subject = request.POST.get("subject", "").strip()
+        message = request.POST.get("message", "").strip()
+
+        if not all([name, email, subject, message]):
+            contact_message = "All fields are required."
+
+        else:
+            try:
+                # Save to database
+                ContactMessage.objects.create(
+                    name=name,
+                    email=email,
+                    subject=subject,
+                    message=message
+                )
+
+                # Send message to you
+                send_mail(
+                    subject=f"New Contact Form Submission: {subject}",
+                    message=(
+                        f"Name: {name}\n"
+                        f"Email: {email}\n\n"
+                        f"Message:\n{message}"
+                    ),
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=["jameskarlsilpao@gmail.com"],
+                    fail_silently=False,
+                )
+
+                # Confirmation to visitor
+                send_mail(
+                    subject="We received your message",
+                    message=(
+                        f"Hi {name},\n\n"
+                        "Thank you for reaching out! "
+                        "I've received your message and will get back to you soon.\n\n"
+                        "Best regards,\n"
+                        "James"
+                    ),
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[email],
+                    fail_silently=False,
+                )
+
+                contact_message = (
+                    "Thank you for your message! "
+                    "I'll get back to you soon."
+                )
+                contact_success = True
+
+            except Exception as e:
+                print("EMAIL ERROR:", e)
+                contact_message = (
+                    "Error sending message. Please try again."
+                )
+
+        return render(
+            request,
+            "index.html",
+            {
+                "contact_message": contact_message,
+                "contact_success": contact_success,
+            },
+        )
+
+    return redirect("index")

@@ -1,30 +1,57 @@
 {% load static %}
 
-<!DOCTYPE html<h<html lang="en" class='bg-gray-200'>
+<!doctype html>
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        (() => {
+            try {
+                const savedTheme = localStorage.getItem('portfolio-theme');
+                const theme = savedTheme === 'light' || savedTheme === 'dark' ? savedTheme : 'dark';
+                document.documentElement.classList.toggle('dark', theme === 'dark');
+            } catch (_) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
     <link rel="stylesheet" href="{% static 'src/output.css' %}">
-    <style>@import url('https://fonts.googleapis.com/css2?family=Bitcount+Prop+Single:wght@100..900&display=swap');</style>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bitcount+Prop+Single:wght@100..900&display=swap');
+    </style>
     <script src="{% static 'js/main.js' %}" defer></script>
     {% block title %}<title>Portfolio</title>{% endblock %}
 </head>
-<body class="w-full flex flex-col justify-center items-center ">
-    <div class="text-center flex justify-center items-center w-full absolute top-3 test-animation">
-        <div class="flex justify-center items-center h-16 w-1/2 bg-orange-500 rounded-2xl border-2 border-orange-900 gap-4">
-            <button onclick="window.location.href='#'"><h1 class="text-zinc-800 text-xs text-center w-13 font-extrabold font-serif">James Karl Silpao</h1></button>
-            <div class="flex flex-wrap justify-center items-center w-full sm:w-1/2 gap-4 font-bold font-serif text-sm sm:text-base">
+<body class="w-full min-h-screen flex flex-col justify-center items-center">
+    <header class="site-header top-3 sm:top-4 flex z-40 fixed w-full justify-center px-3 sm:px-5 test-animation">
+        <div class="site-header__surface flex min-h-16 w-full max-w-4xl flex-wrap items-center justify-between gap-x-5 gap-y-2 rounded-2xl px-4 py-2 sm:px-5 sm:py-0">
+            <a href="#" class="site-brand inline-flex items-center gap-2.5 font-serif text-sm font-extrabold tracking-tight" aria-label="James Karl Silpao, back to top">
+                <span class="site-brand__mark" aria-hidden="true">JK</span>
+                <span>James Karl Silpao</span>
+            </a>
+            <nav class="flex flex-wrap items-center justify-end gap-0.5 font-serif text-sm font-bold sm:gap-1 sm:text-base" aria-label="Primary navigation">
                 <a href="#about">About</a>
                 <a href="#projects">Projects</a>
+                <a href="#skills">Skills</a>
+                <a href="#experience">Experience</a>
                 <a href="#contact">Contact</a>
-                <a href="#resume">Resume</a>
-            </div>
+                <a target="_top" href="https://1drv.ms/b/c/0a5929351260339b/IQRw5NDcN14hSa594RFHEG25ARijmL7I6HUw0W3yCnTH2wg">Resume</a>
+                <span class="site-header__divider" aria-hidden="true"></span>
+                <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch to light theme" aria-pressed="true" title="Switch to light theme">
+                    <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="4"></circle>
+                        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+                    </svg>
+                    <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <span class="sr-only" id="theme-toggle-label">Switch to light theme</span>
+                </button>
+            </nav>
         </div>
-    </div>
+    </header>
     {% block content %}
     {% endblock %}
-    <div class="fixed -right-16 top-1/2 -rotate-90 shine-animation">
-        <button class="relative overflow-hidden px-4 py-2 bg-orange-500 text-zinc-800 font-extrabold font-serif rounded-r-lg rounded-l-lg border-t-2 border-l-2 border-r-2 border-orange-900 before:absolute before:inset-y-0 before:left-0 before:w-1/3 before:bg-linear-to-r before:from-transparent before:via-white/60 before:to-transparent before:animate-[shine_2s_linear_infinite]">AI Unintelligent</button>
-    </div>
 </body>
 </html>
