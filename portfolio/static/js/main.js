@@ -20,6 +20,36 @@ function hide_loan_df() {
     modal.style.display = '';
 }
 
+function show_car_eval() {
+    const modal = document.getElementById('car_eval');
+    if (!modal) return;
+
+    modal.classList.remove('hidden');
+    modal.style.display = 'flex';
+}
+function hide_car_eval() {
+    const modal = document.getElementById('car_eval');
+    if (!modal) return;
+
+    modal.classList.add('hidden');
+    modal.style.display = '';
+}
+
+function show_dashboard() {
+    const modal = document.getElementById('acc_dashboard');
+    if (!modal) return;
+
+    modal.classList.remove('hidden');
+    modal.style.display = 'flex';
+}
+function hide_dashboard() {
+    const modal = document.getElementById('acc_dashboard');
+    if (!modal) return;
+
+    modal.classList.add('hidden');
+    modal.style.display = '';
+}
+
 const themeToggle = document.getElementById('theme-toggle');
 
 function setTheme(theme) {

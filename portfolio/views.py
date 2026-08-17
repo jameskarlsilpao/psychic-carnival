@@ -337,6 +337,92 @@ def evaluate_default(request):
 
     return render(request, 'index.html', context)
 
+def evaluate_car(request):
+    try:
+        Buying_Price = request.GET.get('Buying_Price')
+        Maintenance_Cost = request.GET.get('Maintenance_Cost')
+        Number_of_Persons = request.GET.get('Number_of_Persons')
+        Number_of_Doors = request.GET.get('Number_of_Doors')
+        Luggage_Boot_Size = request.GET.get('Luggage_Boot_Size')
+        Safety = request.GET.get('Safety')
+        car_inputs = {
+            'Buying_Price': Buying_Price,
+            'Maintenance_Cost': Maintenance_Cost,
+            'Number_of_Persons': Number_of_Persons,
+            'Number_of_Doors': Number_of_Doors,
+            'Luggage_Boot_Size': Luggage_Boot_Size,
+            'Safety': Safety,
+        }
+    except Exception:
+            return render(request, 'index.html', {
+                'show_car_eval': True,
+                'car_eval_input_error': 'Invalid input values.',
+                'car_inputs': request.GET,
+            })
+
+    cols = ['Buying', 'maint', 'doors', 'persons', 'lug_boot', 'safety', 'class']
+    df = pd.read_csv("portfolio/static/files/car.data", names=cols)
+
+    # Define mappings for ordinal features
+    buying_maint_map = {'vhigh': 4, 'high': 3, 'med': 2, 'low': 1}
+    doors_persons_map = {'2': 2, '3': 3, '4': 4, '5more': 5, 'more': 5}
+    lug_boot_map = {'small': 1, 'med': 2, 'big': 3}
+    safety_map = {'low': 1, 'med': 2, 'high': 3}
+    class_map = {'unacc': 0, 'acc': 1, 'good': 2, 'vgood': 3}
+
+    # Apply mappings to convert categorical features to numerical
+    df['Buying'] = df['Buying'].map(buying_maint_map)
+    df['maint'] = df['maint'].map(buying_maint_map)
+    df['doors'] = df['doors'].map(doors_persons_map)
+    df['persons'] = df['persons'].map(doors_persons_map)
+    df['lug_boot'] = df['lug_boot'].map(lug_boot_map)
+    df['safety'] = df['safety'].map(safety_map)
+
+    # Convert the target variable 'class' to numerical
+    df['class'] = df['class'].map(class_map)
+
+    # Separate features (X) and target (y)
+    X = df.drop('class', axis=1)
+    y = df['class']
+
+    import xgboost as xgb
+    from sklearn.model_selection import train_test_split
+    from sklearn.metrics import accuracy_score, precision_score, f1_score, recall_score
+
+    # Split the data into training and testing sets
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    best_xgb_model = xgb.XGBClassifier()
+    best_xgb_model.load_model('portfolio/static/files/car_eval_xgboost')
+
+    # Fit GridSearchCV to the training data
+    best_xgb_y_pred = best_xgb_model.predict(X_test)
+
+    Buying_Price =buying_maint_map.get(Buying_Price)
+    Maintenance_Cost = buying_maint_map.get(Maintenance_Cost)
+    Number_of_Doors = doors_persons_map.get(Number_of_Doors)
+    Number_of_Persons = doors_persons_map.get(Number_of_Persons)
+    Luggage_Boot_Size = lug_boot_map.get(Luggage_Boot_Size)
+    Safety = safety_map.get(Safety)
+
+    to_predict = pd.DataFrame({'Buying': [Buying_Price],
+    'maint': [Maintenance_Cost],
+    'doors': [Number_of_Doors],
+    'persons': [Number_of_Persons],
+    'lug_boot': [Luggage_Boot_Size],
+    'safety': [Safety]})
+
+    class_map = {0:'Unacceptable' , 1:'Acceptable', 2:'Good', 3:'Very Good'}
+
+    result = best_xgb_model.predict(to_predict)
+    result = class_map[int(result[0])]
+
+    accuracy = accuracy_score(y_test, best_xgb_y_pred)
+    f1 = f1_score(y_test, best_xgb_y_pred, average='weighted')
+    precision = precision_score(y_test, best_xgb_y_pred, average='weighted')
+    recall = recall_score(y_test, best_xgb_y_pred, average='weighted')
+    
+    return render(request, 'index.html', {'accuracy':accuracy, 'f1':f1, 'precision':precision, 'recall':recall, 'result':result, 'show_car_eval':True, 'car_inputs': request.GET})
 
 def contact(request):
     contact_message = None
