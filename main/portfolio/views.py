@@ -1,10 +1,8 @@
-import math
+import math, joblib, pandas as pd
 from datetime import datetime
-
 from django.shortcuts import render, redirect
 from django.core.mail import send_mail
 from django.conf import settings
-import pandas as pd
 from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_curve, roc_auc_score
@@ -293,14 +291,12 @@ def evaluate_default(request):
     y = df['default']
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    model = joblib.load('portfolio/static/files/loan_def_LR')
 
-    CLF = LogisticRegression(random_state=0, solver='liblinear', tol=1e-5, max_iter=10000)
-    CLF.fit(X_train, y_train)
-
-    y_prob = CLF.predict_proba(X_test)[:, 1]
+    y_prob = model.predict_proba(X_test)[:, 1]
 
     fpr, tpr, thresholds = roc_curve(y_test, y_prob)
-    accuracy = (CLF.predict(X_test) == y_test).mean()
+    accuracy = (model.predict(X_test) == y_test).mean()
     ROCAUC = roc_auc_score(y_test, y_prob)
 
     df_test = X_test.copy()
@@ -321,16 +317,16 @@ def evaluate_default(request):
     context = {
         'show_loan_df': True,
         'loan_inputs': loan_inputs,
-        'coeficient': CLF.coef_.tolist(),
-        'intercept': float(CLF.intercept_[0]) if hasattr(CLF.intercept_, '__len__') else float(CLF.intercept_),
+        'coeficient': model.coef_.tolist(),
+        'intercept': float(model.intercept_[0]) if hasattr(model.intercept_, '__len__') else float(model.intercept_),
         'accuracy': float(accuracy),
         'ROCAUC': float(ROCAUC),
         'summary': summary_records,
     }
 
     if user_input is not None:
-        pred = CLF.predict(user_input)
-        pred_proba = CLF.predict_proba(user_input)
+        pred = model.predict(user_input)
+        pred_proba = model.predict_proba(user_input)
         context['result'] = int(pred[0])
         context['result_probability'] = pred_proba[0].tolist()
         context['default_probability'] = float(pred_proba[0][1] * 100)
@@ -386,7 +382,6 @@ def evaluate_car(request):
     y = df['class']
 
     import xgboost as xgb
-    from sklearn.model_selection import train_test_split
     from sklearn.metrics import accuracy_score, precision_score, f1_score, recall_score
 
     # Split the data into training and testing sets
