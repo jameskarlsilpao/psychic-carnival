@@ -15,7 +15,7 @@ from dotenv import load_dotenv
 import dj_database_url
 from pathlib import Path
 
-load_dotenv()
+load_dotenv('.env.prod')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,13 +25,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-r!k)^cs8kn=h9kr+jdd1os&#k1%g4hmk%ofxl*8z*i184==r1)'
+SECRET_KEY = os.getenv('DJANGO_SECRETKEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = bool(os.getenv('DEBUG', default=0))
 
-ALLOWED_HOSTS = ['*']
-
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "django-web",
+]
+CSRF_TRUSTED_ORIGINS = os.getenv('DJANGO_CSRF_TRUSTED_ORIGIN', "127.0.0.1").split(",")
 
 # Application definition
 
@@ -80,23 +84,16 @@ WSGI_APPLICATION = 'main.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
-ENVIRONMENT = os.getenv('ENVIRONMENT', 'DEVELOPMENT').upper()
-
-if ENVIRONMENT == 'PRODUCTION':
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=os.getenv('DATABASE_URL'),
-            conn_max_age=600,
-            ssl_require=True,
-        )
+DATABASES = {
+    'default': {
+        'DB_ENGINE': os.getenv("DB_ENGINE"),
+        'DB_NAME': os.getenv("DB_NAME"),
+        'DB_USERNAME': os.getenv("DB_USERNAME"),    
+        'DB_PASSWORD': os.getenv("DB_PASSWORD"),    
+        'DB_HOST': os.getenv("DB_HOST"),    
+        'DB_PORT': os.getenv("DB_PORT"),    
     }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
+}
 
 
 # Password validation
@@ -135,9 +132,9 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-STATIC_DIRS = [os.path.join(BASE_DIR, 'portfolio/static')]
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'portfolio/static')]
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles/')
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
