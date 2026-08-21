@@ -1,6 +1,22 @@
-node_modules/
-.venv/
-venv/
+# Environment files (contain secrets)
 .env
-.env.*
-db.sqlite3
+.env.local
+.env.prod
+
+# Database
+*.sqlite3
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Node
+node_modules/
+
+# Django
+staticfiles/
+
+# Generated Tailwind output (optional — see note below)
+# portfolio/static/src/output.css
