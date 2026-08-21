@@ -1,0 +1,12 @@
+{
+  "scripts": {
+    "tailwind": "npx @tailwindcss/cli -i portfolio/static/src/input.css -o portfolio/static/src/output.css --minify"
+  },
+  "devDependencies": {
+    "tailwindcss": "^4.3.3",
+    "@tailwindcss/cli": "^4.3.3"
+  },
+  "allowScripts": {
+    "@parcel/watcher@2.5.1": true
+  }
+}

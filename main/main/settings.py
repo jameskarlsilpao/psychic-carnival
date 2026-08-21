@@ -28,13 +28,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('DJANGO_SECRETKEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(os.getenv('DEBUG', default=0))
+DEBUG = (os.environ.get('DEBUG') == "True")
 
-ALLOWED_HOSTS = [
-    "localhost",
-    "127.0.0.1",
-    "django-web",
-]
+ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', "127.0.0.1").split(",")
 CSRF_TRUSTED_ORIGINS = os.getenv('DJANGO_CSRF_TRUSTED_ORIGIN', "127.0.0.1").split(",")
 
 # Application definition
@@ -86,12 +82,12 @@ WSGI_APPLICATION = 'main.wsgi.application'
 
 DATABASES = {
     'default': {
-        'DB_ENGINE': os.getenv("DB_ENGINE"),
-        'DB_NAME': os.getenv("DB_NAME"),
-        'DB_USERNAME': os.getenv("DB_USERNAME"),    
-        'DB_PASSWORD': os.getenv("DB_PASSWORD"),    
-        'DB_HOST': os.getenv("DB_HOST"),    
-        'DB_PORT': os.getenv("DB_PORT"),    
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('POSTGRES_DB'),
+        'USER': os.getenv('POSTGRES_USER'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'HOST': os.getenv('POSTGRES_HOST', 'db'),  # <- make sure this isn't blank
+        'PORT': os.getenv('POSTGRES_PORT', '5432'),
     }
 }
 
@@ -131,10 +127,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
 STATIC_URL = 'static/'
-
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'portfolio/static')]
-
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [BASE_DIR / 'portfolio/static',]
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 

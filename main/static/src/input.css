@@ -1,0 +1,183 @@
+@import "tailwindcss";
+
+/* CUSTOM CSS */
+@theme {
+    --test-animation: fadeEffect 5s ease-in-out;
+    @keyframes fadeEffect {
+        0% { opacity: 0; }
+        30% { opacity: 0.8; }
+        60% { opacity: 0.2; }
+        100% { opacity: 1; }
+    }
+
+    --shine-animation: shine 2s linear infinite;
+    @keyframes shine {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(400%); }
+    }
+
+    --animate-fade-up: fadeUp 0.7s ease-out both;
+    @keyframes fadeUp {
+        0% { opacity: 0; transform: translateY(40px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+
+    --animate-fade-in: fadeIn 0.8s ease-out both;
+    @keyframes fadeIn {
+        0% { opacity: 0; }
+        100% { opacity: 1; }
+    }
+
+    --animate-slide-left: slideLeft 0.8s ease-out both;
+    @keyframes slideLeft {
+        0% { opacity: 0; transform: translateX(-40px); }
+        100% { opacity: 1; transform: translateX(0); }
+    }
+
+    --animate-slide-right: slideRight 0.8s ease-out both;
+    @keyframes slideRight {
+        0% { opacity: 0; transform: translateX(40px); }
+        100% { opacity: 1; transform: translateX(0); }
+    }
+}
+
+/* Project card reveal on scroll using IntersectionObserver */
+.project-card {
+    opacity: 0;
+}
+.project-card.is-visible {
+    animation: fadeUp 0.7s ease-out forwards;
+}
+.project-card:nth-child(odd).is-visible {
+    animation: slideLeft 0.8s ease-out forwards;
+}
+.project-card:nth-child(even).is-visible {
+    animation: slideRight 0.8s ease-out forwards;
+}
+
+/* Subtle gradient shimmer on hover */
+.project-card:hover .card-image {
+    transform: scale(1.03);
+}
+.card-image {
+    transition: transform 0.5s ease;
+}
+
+.bitcount-prop-single-pixel {
+  font-family: "Bitcount Prop Single", system-ui;
+}
+
+/* Site theme: midnight blue surfaces make the orange accent feel intentional. */
+:root {
+    color-scheme: dark;
+    background: #07142c;
+}
+
+body {
+    background:
+        radial-gradient(circle at 12% -8%, rgb(52 102 177 / .48) 0, transparent 31rem),
+        radial-gradient(circle at 88% 8%, rgb(249 115 22 / .12) 0, transparent 22rem),
+        #07142c;
+    color: #e2e8f0;
+    transition: background-color .25s ease, color .25s ease;
+}
+
+.site-header__surface {
+    background: rgb(9 23 49 / .84);
+    border: 1px solid rgb(251 146 60 / .42);
+    box-shadow: 0 16px 38px rgb(2 8 23 / .28), inset 0 1px 0 rgb(255 255 255 / .08);
+    backdrop-filter: blur(16px);
+}
+
+.site-brand { color: #fff7ed; }
+.site-brand:hover { color: #fed7aa; }
+.site-brand__mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: .625rem;
+    background: #f97316;
+    color: #111827;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / .35);
+    font-size: .7rem;
+    letter-spacing: .04em;
+}
+
+.site-header a {
+    color: #e2e8f0;
+    border-radius: .5rem;
+    padding: .45rem .55rem;
+    transition: color .2s ease, background-color .2s ease;
+}
+.site-header nav a:hover { color: #fff7ed; background: rgb(249 115 22 / .16); }
+.site-header a:focus-visible { outline: 2px solid #fb923c; outline-offset: 2px; }
+.site-header__divider {
+    display: block;
+    width: 1px;
+    height: 1.5rem;
+    margin: 0 .2rem;
+    background: rgb(187, 156, 132);
+}
+
+.theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    flex: 0 0 auto;
+    border: 1px solid rgb(251 146 60 / .48);
+    border-radius: .75rem;
+    color: #fff7ed;
+    background: rgb(249 115 22 / .12);
+    cursor: pointer;
+    transition: background-color .2s ease, color .2s ease, transform .2s ease, box-shadow .2s ease;
+}
+.theme-toggle:hover { background: #f97316; color: #111827; transform: translateY(-1px); box-shadow: 0 6px 16px rgb(249 115 22 / .22); }
+.theme-toggle:focus-visible { outline: 3px solid #fed7aa; outline-offset: 2px; }
+.theme-icon { width: 1.1rem; height: 1.1rem; }
+.theme-icon-sun { display: none; }
+.theme-icon-moon { display: block; }
+
+html.dark {
+    color-scheme: dark;
+    background: #07142c;
+}
+html.dark body {
+    background:
+        radial-gradient(circle at 12% -8%, rgb(52 102 177 / .48) 0, transparent 31rem),
+        radial-gradient(circle at 88% 8%, rgb(249 115 22 / .12) 0, transparent 22rem),
+        #07142c;
+    color: #e2e8f0;
+}
+html.dark .bg-white { background-color: #102244 !important; }
+html.dark .bg-zinc-50 { background-color: #0c1b37 !important; }
+html.dark .bg-zinc-100 { background-color: #1b3157 !important; }
+html.dark .bg-amber-50 { background-color: #1a2948 !important; }
+html.dark .border-zinc-100, html.dark .border-zinc-200, html.dark .border-zinc-300 { border-color: #2c4166 !important; }
+html.dark .text-zinc-800, html.dark .text-zinc-700, html.dark .text-zinc-600 { color: #e2e8f0 !important; }
+html.dark .text-zinc-500 { color: #a9b8d3 !important; }
+html.dark .text-zinc-900 { color: #101827 !important; }
+html.dark input { color: #f8fafc !important; background-color: #172b4f !important; }
+html.dark .theme-icon-sun { display: block; }
+html.dark .theme-icon-moon { display: none; }
+
+html:not(.dark) {
+    color-scheme: light;
+    background: #f5f7fb;
+}
+html:not(.dark) body {
+    background: radial-gradient(circle at 10% 0%, #e0ecff 0, transparent 30rem), #f5f7fb;
+    color: #172033;
+}
+html:not(.dark) .site-header__surface {
+    background: rgba(248, 242, 234, 0.301);
+    border-color: rgb(234 88 12 / .38);
+    box-shadow: 0 16px 38px rgb(15 23 42 / .12), inset 0 1px 0 #fff;
+}
+html:not(.dark) .site-brand, html:not(.dark) .site-header a { color: #172033; }
+html:not(.dark) .site-header nav a:hover { color: #9a3412; background: rgba(249, 116, 22, 0.795); }
+html:not(.dark) .theme-toggle { color: #172033; background: #fff7ed; border-color: rgb(234 88 12 / .38); }
+html:not(.dark) .theme-toggle:hover { color: #111827; background: #f97316; }
